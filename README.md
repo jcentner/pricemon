@@ -70,11 +70,20 @@ python3 -m unittest discover -s tests
 python3 -m compileall src tests
 ```
 
-## Docker
+## Podman
+
+Containers are optional; the plain Python commands above are enough for local use. For a VPS, Podman gives a simple always-on deployment path.
 
 ```bash
-docker compose up --build
+podman build -t pricemon:latest .
+podman run --rm \
+	--env-file .env \
+	-v "$PWD/config.toml:/app/config.toml:ro" \
+	-v "$PWD/data:/app/data" \
+	localhost/pricemon:latest pricemon --dry-run
 ```
+
+For 24/7 use, run the same image from a user-level `systemd` service with `Restart=always`.
 
 ## Suggested Agent Skills
 
