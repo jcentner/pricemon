@@ -7,7 +7,14 @@ from dataclasses import dataclass
 class FeedItem:
     item_id: str
     source: str
+    source_name: str
     title: str
     link: str
     summary: str = ""
     published_at: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class MatchedItem:
+    item: FeedItem
+    rule_name: str

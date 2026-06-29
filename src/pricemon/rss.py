@@ -6,7 +6,13 @@ import httpx
 from .models import FeedItem
 
 
-async def fetch_feed(url: str, *, user_agent: str, timeout: float = 20.0) -> list[FeedItem]:
+async def fetch_feed(
+    source_name: str,
+    url: str,
+    *,
+    user_agent: str,
+    timeout: float = 20.0,
+) -> list[FeedItem]:
     headers = {"User-Agent": user_agent}
     async with httpx.AsyncClient(timeout=timeout, headers=headers) as client:
         response = await client.get(url)
@@ -25,6 +31,7 @@ async def fetch_feed(url: str, *, user_agent: str, timeout: float = 20.0) -> lis
             FeedItem(
                 item_id=str(item_id),
                 source=str(source),
+                source_name=source_name,
                 title=str(title),
                 link=str(link),
                 summary=str(entry.get("summary") or ""),

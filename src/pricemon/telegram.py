@@ -5,16 +5,18 @@ import html
 import httpx
 
 from .filters import extract_category, extract_price
-from .models import FeedItem
+from .models import MatchedItem
 
 
-def render_message(item: FeedItem) -> str:
+def render_message(match: MatchedItem) -> str:
+    item = match.item
     title = html.escape(item.title)
     category = extract_category(item.title)
     price = extract_price(item.title)
 
     lines = [f"<b>{title}</b>"]
-    details = []
+    details = [item.source_name]
+    details.append(f"rule: {match.rule_name}")
     if category:
         details.append(category.upper())
     if price:

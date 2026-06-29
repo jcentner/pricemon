@@ -1,18 +1,31 @@
-poll_interval_seconds = 45
+poll_interval_seconds = 60
+first_run_mark_seen = true
+disable_web_page_preview = false
 database_path = "data/pricemon.db"
-user_agent = "pricemon/0.1 (+https://github.com/your-user/pricemon)"
+user_agent = "pricemon/0.1 (+https://github.com/jcentner/pricemon)"
 
 [[sources]]
 name = "buildapcsales"
 url = "https://www.reddit.com/r/buildapcsales/new/.rss"
-include = []
-exclude = ["expired", "sold out"]
-categories = []
 
-# Example focused source:
-# [[sources]]
-# name = "gpu-deals"
-# url = "https://www.reddit.com/r/buildapcsales/new/.rss"
-# include = ["gpu", "graphics", "rtx", "radeon"]
-# exclude = ["prebuilt"]
-# categories = ["gpu"]
+[[rules]]
+name = "gpu-upgrade"
+sources = ["buildapcsales"]
+categories = ["gpu"]
+include_any = ["rtx 5070", "rtx 5080", "radeon", "rx 9070"]
+exclude_any = ["prebuilt", "laptop", "refurbished"]
+max_price = 650
+
+[[rules]]
+name = "4tb-nvme"
+sources = ["buildapcsales"]
+categories = ["ssd"]
+include_all = ["4tb"]
+include_any = ["nvme", "m.2", "pcie"]
+exclude_any = ["external", "portable"]
+max_price = 230
+
+[[rules]]
+name = "all-deals"
+sources = ["buildapcsales"]
+exclude_any = ["expired", "sold out"]
