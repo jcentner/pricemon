@@ -72,7 +72,7 @@ python3 -m compileall src tests
 
 ## Podman
 
-Containers are optional; the plain Python commands above are enough for local use. For a VPS, Podman gives a simple always-on deployment path.
+Containers are optional; the plain Python commands above are enough for local use. For a VPS, Podman gives a simple always-on deployment path. See [docs/deployment.md](docs/deployment.md) for the systemd service runbook.
 
 ```bash
 podman build -t pricemon:latest .
