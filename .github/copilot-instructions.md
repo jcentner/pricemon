@@ -8,11 +8,12 @@ This repo is a lightweight RSS-to-Telegram monitor for PC parts deals.
 - Tests live in `tests/` and should use stdlib `unittest` unless a dependency is already justified.
 - Runtime config comes from `.env` for secrets and `config.toml` for non-secret feed/filter settings.
 - Do not require Reddit credentials. This project monitors public RSS feeds.
+- Container deployment uses Podman and `Containerfile`; Docker Compose is intentionally not part of the repo.
 
 ## Development
 
 - Keep dependencies minimal. Prefer stdlib where it stays readable.
-- Do not commit Telegram bot tokens, chat IDs, or local SQLite data.
+- Do not commit Telegram bot tokens, chat IDs, VPS host details, `config.toml`, or local SQLite data.
 - Validate with `python3 -m unittest discover -s tests` and `python3 -m compileall src tests`.
 - Keep user-facing notification text compact and Telegram-safe.
 

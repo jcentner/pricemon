@@ -38,6 +38,16 @@ Expected output shape:
 fetched=25 marked_seen=0 matched=0 sent=0
 ```
 
+Test Telegram delivery before enabling the daemon:
+
+```bash
+podman run --rm \
+  --env-file .env \
+  -v "$PWD/config.toml:/app/config.toml:ro" \
+  -v "$PWD/data:/app/data" \
+  localhost/pricemon:latest pricemon --send-test
+```
+
 ## User Systemd Service
 
 Create `~/.config/systemd/user/pricemon.service`:

@@ -70,7 +70,7 @@ python3 -m unittest discover -s tests
 python3 -m compileall src tests
 ```
 
-## Podman
+## Deployment
 
 Containers are optional; the plain Python commands above are enough for local use. For a VPS, Podman gives a simple always-on deployment path. See [docs/deployment.md](docs/deployment.md) for the systemd service runbook.
 
@@ -84,7 +84,3 @@ podman run --rm \
 ```
 
 For 24/7 use, run the same image from a user-level `systemd` service with `Restart=always`.
-
-## Suggested Agent Skills
-
-No repo skill is needed yet. Add one later only if a repeated procedure emerges, such as deployment operations or source evaluation.
