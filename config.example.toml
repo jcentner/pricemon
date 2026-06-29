@@ -1,0 +1,18 @@
+poll_interval_seconds = 45
+database_path = "data/pricemon.db"
+user_agent = "pricemon/0.1 (+https://github.com/your-user/pricemon)"
+
+[[sources]]
+name = "buildapcsales"
+url = "https://www.reddit.com/r/buildapcsales/new/.rss"
+include = []
+exclude = ["expired", "sold out"]
+categories = []
+
+# Example focused source:
+# [[sources]]
+# name = "gpu-deals"
+# url = "https://www.reddit.com/r/buildapcsales/new/.rss"
+# include = ["gpu", "graphics", "rtx", "radeon"]
+# exclude = ["prebuilt"]
+# categories = ["gpu"]
