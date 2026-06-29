@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import signal
 from dataclasses import dataclass
 
 from .config import RuleConfig, Settings, SourceConfig
@@ -62,13 +63,24 @@ async def run_once(settings: Settings, *, dry_run: bool = False) -> RunResult:
 
 
 async def run_forever(settings: Settings) -> None:
-    while True:
+    stop_event = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    for signal_number in (signal.SIGINT, signal.SIGTERM):
+        try:
+            loop.add_signal_handler(signal_number, stop_event.set)
+        except NotImplementedError:
+            signal.signal(signal_number, lambda *_: stop_event.set())
+
+    while not stop_event.is_set():
         try:
             result = await run_once(settings)
             print(_format_result(result))
         except Exception as exc:
             print(f"poll failed: {exc}")
-        await asyncio.sleep(settings.poll_interval_seconds)
+        try:
+            await asyncio.wait_for(stop_event.wait(), timeout=settings.poll_interval_seconds)
+        except asyncio.TimeoutError:
+            continue
 
 
 def validate_delivery_settings(settings: Settings) -> None:
