@@ -74,22 +74,30 @@ Researched 2026-06-30 from public RSS/feed/search pages. This file is generic an
 
 ## Reddit Candidates
 
-These are RSS-compatible in principle, but the probe hit Reddit `429 Too Many Requests` from this environment after checking r/buildapcsales. Test individually before enabling.
+These are RSS-compatible in principle, but Reddit may throttle anonymous RSS probing with `429 Too Many Requests`. Test individually before enabling and avoid probing many Reddit feeds in one burst.
 
 ### r/hardwareswap
 
 - URL: `https://www.reddit.com/r/hardwareswap/new/.rss`
-- Probe: HTTP 429 during research.
+- Probe: HTTP 200 on retry, Atom feed, 25 entries.
 - Expected fit: used-market hardware listings.
-- Expected title style to verify before enabling: location + have/want pattern, often like `[USA-XX] [H] ... [W] PayPal/local`.
+- Observed title format:
+  - `[USA-OH] [H] PayPal, Local Cash [W] Black Dualsense Edge`
+  - `[USA-TX] [H] Paypal [W] Gaming laptop with 5070ti and OLED`
+  - `[USA - FL] [H] PayPal or Local Cash [W] RX 9070xt`
+  - `[USA-MI][H] Kingston skc3000d/2048 [W] $$$`
+  - `[USA-MA] [H] Gaming PC Powercolor Fighter AMD Radeon RX 6600XT, AMD Ryzen 7 7700x, 32GB (2x16) G.Skill Flare x5 DDR5 6000 RAM, MSI Pro B650-P Wifi, Corsair RM750x PSU, ...`
+- Link format: Reddit comments URL.
 - Rule strategy:
-  - Do not use `categories` unless observed titles support them.
-  - Use strict `include_any` and exclude `wanted`, `[w]`, `local only`, `laptop`, `prebuilt` as needed.
+  - Do not use `categories`; titles use location and `[H]` / `[W]` markers, not product categories.
+  - Wanted posts are common. For buying alerts, require `[H]` titles containing target parts and exclude obvious `[W]`-only patterns where possible.
+  - Use strict `include_any` and exclude `gaming laptop`, `laptop`, `gaming pc`, `prebuilt`, and `local only` if shipping matters.
+  - Price parsing is weaker here because many titles use `PayPal`, `Local Cash`, or `$$$` instead of explicit prices.
 
 ### r/homelabsales
 
 - URL: `https://www.reddit.com/r/homelabsales/new/.rss`
-- Probe: HTTP 429 during research.
+- Probe: HTTP 429 during initial research and a later single-feed retry.
 - Expected fit: server, storage, networking, and occasional memory/SSD deals.
 - Rule strategy:
   - Better for storage/RAM/networking than consumer GPU alerts.
@@ -98,19 +106,31 @@ These are RSS-compatible in principle, but the probe hit Reddit `429 Too Many Re
 ### r/buildapcmonitors
 
 - URL: `https://www.reddit.com/r/buildapcmonitors/new/.rss`
-- Probe: HTTP 429 during research.
+- Probe: HTTP 429 during initial research and a later single-feed retry.
 - Expected fit: monitor discussion/deals; likely noisier than r/buildapcsales.
 
 ### r/sffpcswap
 
 - URL: `https://www.reddit.com/r/sffpcswap/new/.rss`
-- Probe: HTTP 429 during research.
+- Probe: HTTP 200 on retry, Atom feed, 25 entries.
 - Expected fit: SFF cases, mini-ITX motherboards, SFX PSUs.
+- Observed title format:
+  - `In NYCL Trading intel cpu and motherboard for a 7800x3d and a motherboard`
+  - `[USA-IN][H] SSUPD White Meshlicious 4.0, Corsair SF750, S300"Shiny Snake" PCIE 4.0, ASUSTOR 2 bay NAS, and MSI 240 AIO [W] Verified Paypal`
+  - `[USA-FL] [H] Dancase C4 [W] Local or PayPal`
+  - `[USA-NY] [H] Louqe Ghost S1 Black w/ Large Tophat, Small Tophat and Custom Corsair Cables, SSUPD Meshlicious White ...`
+  - `[usa-nj][h]sff case: DAN A4-SFX v1 [w] paypal/local cash`
+- Link format: Reddit comments URL.
+- Rule strategy:
+  - Do not use `categories`; titles are mostly swap format or freeform.
+  - Useful for SFF-specific parts, not broad GPU/RAM tracking.
+  - Use `include_any` for exact case/PSU/motherboard terms like `sf750`, `meshlicious`, `dan a4`, `itx`, `z890-i`.
+  - Exclude `trading`, `[w]`, and `local` if only shipped sale posts matter.
 
 ### r/bapcsalescanada
 
 - URL: `https://www.reddit.com/r/bapcsalescanada/new/.rss`
-- Probe: HTTP 429 during research.
+- Probe: HTTP 429 during initial research and a later single-feed retry.
 - Expected fit: Canadian deals only; likely not useful for US-focused buying.
 
 ## Poor Fits Or Adapter Candidates
