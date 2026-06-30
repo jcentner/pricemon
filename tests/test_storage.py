@@ -29,3 +29,14 @@ class SeenStoreTests(unittest.TestCase):
 
             self.assertTrue(store.is_seen(item.item_id))
             self.assertTrue(store.is_initialized())
+
+    def test_marks_source_initialized(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = SeenStore(Path(temp_dir) / "seen.db")
+            store.init()
+
+            self.assertFalse(store.is_source_initialized("slickdeals-5080"))
+
+            store.set_source_initialized("slickdeals-5080")
+
+            self.assertTrue(store.is_source_initialized("slickdeals-5080"))

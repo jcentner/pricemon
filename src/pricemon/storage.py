@@ -50,6 +50,25 @@ class SeenStore:
                 """
             )
 
+    def is_source_initialized(self, source_name: str) -> bool:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT value FROM state WHERE key = ?",
+                (_source_key(source_name),),
+            ).fetchone()
+        return row is not None and row[0] == "1"
+
+    def set_source_initialized(self, source_name: str) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO state (key, value)
+                VALUES (?, '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """,
+                (_source_key(source_name),),
+            )
+
     def is_seen(self, item_id: str) -> bool:
         with self._connect() as conn:
             row = conn.execute(
@@ -96,3 +115,7 @@ class SeenStore:
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(self.path)
+
+
+def _source_key(source_name: str) -> str:
+    return f"source_initialized:{source_name}"

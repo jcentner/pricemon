@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import signal
+from collections import defaultdict
 from dataclasses import dataclass
 
 from .config import RuleConfig, Settings, SourceConfig
@@ -35,10 +36,9 @@ async def run_once(settings: Settings, *, dry_run: bool = False) -> RunResult:
             print()
         return RunResult(fetched=fetched, matched=len(matches))
 
-    if settings.first_run_mark_seen and not store.is_initialized():
-        store.mark_many_seen(items)
-        store.set_initialized()
-        return RunResult(fetched=fetched, marked_seen=fetched)
+    marked_seen = 0
+    if settings.first_run_mark_seen:
+        items, marked_seen = _mark_uninitialized_sources_seen(store, items)
 
     sent = 0
     matched = 0
@@ -59,7 +59,7 @@ async def run_once(settings: Settings, *, dry_run: bool = False) -> RunResult:
         store.mark_seen(item, rule_name=match.rule_name, delivered=True)
         sent += 1
     store.set_initialized()
-    return RunResult(fetched=fetched, matched=matched, sent=sent)
+    return RunResult(fetched=fetched, marked_seen=marked_seen, matched=matched, sent=sent)
 
 
 async def run_forever(settings: Settings) -> None:
@@ -97,6 +97,26 @@ def _format_result(result: RunResult) -> str:
         f"matched={result.matched} "
         f"sent={result.sent}"
     )
+
+
+def _mark_uninitialized_sources_seen(
+    store: SeenStore,
+    items: list[FeedItem],
+) -> tuple[list[FeedItem], int]:
+    by_source: dict[str, list[FeedItem]] = defaultdict(list)
+    for item in items:
+        by_source[item.source_name].append(item)
+
+    remaining: list[FeedItem] = []
+    marked_seen = 0
+    for source_name, source_items in by_source.items():
+        if store.is_source_initialized(source_name):
+            remaining.extend(source_items)
+            continue
+        store.mark_many_seen(source_items)
+        store.set_source_initialized(source_name)
+        marked_seen += len(source_items)
+    return remaining, marked_seen
 
 
 async def _fetch_all(settings: Settings) -> list[FeedItem]:
