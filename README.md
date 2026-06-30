@@ -20,11 +20,13 @@ cp config.example.toml config.toml
 Set Telegram secrets in `.env`:
 
 ```text
-TELEGRAM_BOT_TOKEN=123456:abc...
-TELEGRAM_CHAT_ID=123456789
+TELEGRAM_BOT_TOKEN=<bot-token>
+TELEGRAM_CHAT_ID=<chat-id>
 ```
 
 Edit `config.toml` for feeds and rules.
+
+See [docs/source-compendium.md](docs/source-compendium.md) for researched source options and observed title formats.
 
 Example rule:
 

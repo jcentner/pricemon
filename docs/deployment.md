@@ -13,8 +13,8 @@ These files are local and must not be committed:
 Minimum `.env`:
 
 ```text
-TELEGRAM_BOT_TOKEN=123456:abc...
-TELEGRAM_CHAT_ID=123456789
+TELEGRAM_BOT_TOKEN=<bot-token>
+TELEGRAM_CHAT_ID=<chat-id>
 PRICEMON_CONFIG=config.toml
 PRICEMON_DB=data/pricemon.db
 ```
