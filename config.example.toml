@@ -8,24 +8,58 @@ user_agent = "pricemon/0.1 (+https://github.com/jcentner/pricemon)"
 name = "buildapcsales"
 url = "https://www.reddit.com/r/buildapcsales/new/.rss"
 
+# Verified 2026-09-06: HTTP 200 RSS, 2 / 2 / 25 entries respectively.
+[[sources]]
+name = "slickdeals-arc-b50"
+url = "https://slickdeals.net/newsearch.php?searcharea=deals&searchin=first&q=arc+b50&rss=1"
+
+[[sources]]
+name = "slickdeals-arc-b60"
+url = "https://slickdeals.net/newsearch.php?searcharea=deals&searchin=first&q=arc+b60&rss=1"
+
+[[sources]]
+name = "slickdeals-5070-ti"
+url = "https://slickdeals.net/newsearch.php?searcharea=deals&searchin=first&q=5070+ti&rss=1"
+
+# Focused rules first; there is deliberately no broad all-deals fallback.
 [[rules]]
-name = "gpu-upgrade"
-sources = ["buildapcsales"]
-categories = ["gpu"]
-include_any = ["rtx 5070", "rtx 5080", "radeon", "rx 9070"]
-exclude_any = ["prebuilt", "laptop", "refurbished"]
-max_price = 650
+name = "arc-b50-b60"
+sources = ["buildapcsales", "slickdeals-arc-b50", "slickdeals-arc-b60"]
+# Require [GPU] on Reddit only; Slickdeals titles have no category tags.
+categories = { buildapcsales = ["gpu"] }
+include_all = ["arc"]
+include_any = ["b50", "b60"]
+exclude_any = ["prebuilt", "pre-built", "gaming pc", "gaming desktop", "desktop pc", "pc:"]
+# Case-insensitive Python regexes; TOML literal strings preserve backslashes.
+exclude_patterns = [
+    # Require standalone Arc and B50/B60 tokens, not B650/B660/B860 or embedded names.
+    '^(?!.*\barc\b.*\bb[56]0\b)',
+    '\b(?:laptop|notebook|mobile)\b',
+    '\b1[4-8](\.\d)?["\u201d]',
+    '\b1[4-8](\.\d)?[ -]?inch\b',
+    '\boled\b',
+    '\b\d{3}\s?hz\b',
+    '\b\d{3,5}\s*h(?:x)?\b',
+    # System RAM, storage or CPUs indicate a whole PC, not a standalone card.
+    '\b(?:ddr[45]|ssd|ryzen|core\s+(?:ultra|i[3579])|i[3579]-\d)',
+]
+# No price bounds: any price, including store pickup and dual-GPU boards.
 
 [[rules]]
-name = "4tb-nvme"
-sources = ["buildapcsales"]
-categories = ["ssd"]
-include_all = ["4tb"]
-include_any = ["nvme", "m.2", "pcie"]
-exclude_any = ["external", "portable"]
-max_price = 230
-
-[[rules]]
-name = "all-deals"
-sources = ["buildapcsales"]
-exclude_any = ["expired", "sold out"]
+name = "rtx-5070-ti"
+sources = ["buildapcsales", "slickdeals-5070-ti"]
+categories = { buildapcsales = ["gpu"] }
+include_all = ["rtx"]
+include_any = ["5070 ti", "5070ti"]
+exclude_any = ["prebuilt", "pre-built", "gaming pc", "gaming desktop", "desktop pc", "pc:", "aegis", "omen"]
+exclude_patterns = [
+    '^(?!.*\b(?:rtx)?5070\s?ti\b)',
+    '\b(?:laptop|notebook|mobile)\b',
+    '\b1[4-8](\.\d)?["\u201d]',
+    '\b1[4-8](\.\d)?[ -]?inch\b',
+    '\boled\b',
+    '\b\d{3}\s?hz\b',
+    '\b\d{3,5}\s*h(?:x)?\b',
+    '\b(?:ddr[45]|ssd|ryzen|core\s+(?:ultra|i[3579])|i[3579]-\d)',
+]
+# No price bounds; do not exclude "desktop" alone (desktop graphics cards count).

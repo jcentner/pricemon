@@ -58,14 +58,21 @@ def matches_filters(
     return True
 
 
-def matches_rule(title: str, rule: RuleConfig) -> bool:
+def matches_rule(title: str, rule: RuleConfig, *, source_name: str = "") -> bool:
     normalized_title = title.lower()
     category = extract_category(title)
     price = extract_price_value(title)
 
-    if not category_matches(category, rule.categories):
+    categories = (
+        rule.categories.get(source_name, ())
+        if isinstance(rule.categories, dict)
+        else rule.categories
+    )
+    if not category_matches(category, categories):
         return False
     if rule.exclude_any and any(term in normalized_title for term in rule.exclude_any):
+        return False
+    if any(re.search(pattern, title, re.IGNORECASE) for pattern in rule.exclude_patterns):
         return False
     if rule.include_all and not all(term in normalized_title for term in rule.include_all):
         return False
