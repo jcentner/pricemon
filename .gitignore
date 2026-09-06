@@ -9,4 +9,5 @@ build/
 dist/
 *.egg-info/
 data/
-config.toml.claude/worktrees/
+config.toml
+.claude/worktrees/
