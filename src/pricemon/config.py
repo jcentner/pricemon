@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,9 +27,10 @@ class RuleConfig:
     include_any: tuple[str, ...] = ()
     include_all: tuple[str, ...] = ()
     exclude_any: tuple[str, ...] = ()
-    categories: tuple[str, ...] = ()
+    categories: tuple[str, ...] | dict[str, tuple[str, ...]] = ()
     min_price: float | None = None
     max_price: float | None = None
+    exclude_patterns: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,9 +131,10 @@ def _load_rules(raw_rules: object) -> list[RuleConfig]:
                 include_any=_as_tuple(raw_rule.get("include_any", [])),
                 include_all=_as_tuple(raw_rule.get("include_all", [])),
                 exclude_any=_as_tuple(raw_rule.get("exclude_any", [])),
-                categories=_as_tuple(raw_rule.get("categories", [])),
+                categories=_as_categories(raw_rule.get("categories", [])),
                 min_price=_as_optional_float(raw_rule.get("min_price")),
                 max_price=_as_optional_float(raw_rule.get("max_price")),
+                exclude_patterns=_as_patterns(raw_rule.get("exclude_patterns", []), name),
             )
         )
     return rules
@@ -141,6 +144,25 @@ def _as_tuple(value: object) -> tuple[str, ...]:
     if not isinstance(value, list):
         raise ValueError("filter values must be lists")
     return tuple(str(item).strip().lower() for item in value if str(item).strip())
+
+
+def _as_categories(value: object) -> tuple[str, ...] | dict[str, tuple[str, ...]]:
+    if isinstance(value, dict):
+        return {str(source).strip().lower(): _as_tuple(tags) for source, tags in value.items()}
+    return _as_tuple(value)
+
+
+def _as_patterns(value: object, rule_name: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        raise ValueError(f"rule {rule_name!r}: exclude_patterns must be a list of strings")
+    for pattern in value:
+        try:
+            re.compile(pattern, re.IGNORECASE)
+        except re.error as exc:
+            raise ValueError(
+                f"rule {rule_name!r}: invalid exclude_patterns regex {pattern!r}: {exc}"
+            ) from exc
+    return tuple(value)
 
 
 def _as_bool(value: object) -> bool:

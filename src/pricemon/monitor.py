@@ -146,6 +146,6 @@ def _match_item(item: FeedItem, rules: tuple[RuleConfig, ...]) -> MatchedItem | 
     for rule in rules:
         if rule.sources and item.source_name not in rule.sources:
             continue
-        if matches_rule(item.title, rule):
+        if matches_rule(item.title, rule, source_name=item.source_name):
             return MatchedItem(item=item, rule_name=rule.name)
     return None
